@@ -38,21 +38,22 @@ app.get('/members', (req, res) => {
  * @body activities: array[string]
  * @body rating: enum [1-5]
  */
-app.post('/members', (req, res) => {
-  console.log('POST /members');
+app.post("/members", (req, res) => {
   const body = req.body.body;
+  let newMember = body;
   if (body) {
     if (!body.name) {
-      res.send('Name is required');
+      res.send("Name is required");
       return;
     }
-    members.push({
+    newMember = {
       id: randomNumber,
       activities: [],
-      ...body
-    });
+      ...body,
+    };
+    members.push(newMember);
   }
-  res.send(req.body);
+  res.send(newMember);
 });
 
 /**
