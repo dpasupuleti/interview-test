@@ -12,8 +12,6 @@ app.use(cors(corsOptions));
 
 app.use(bodyParser.json());
 
-const randomNumber = Math.floor(10000 + Math.random() * 90000);
-
 /**
  * @query query: string
  */
@@ -47,7 +45,7 @@ app.post("/members", (req, res) => {
       return;
     }
     newMember = {
-      id: randomNumber,
+      id: Math.floor(10000 + Math.random() * 90000),
       activities: [],
       ...body,
     };
