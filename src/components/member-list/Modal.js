@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const Modal = ({ show, children, onClose }) => (
+export const Modal = ({ show, children, onClose, title }) => (
   <>
     <div
       className={`modal fade ${show ? 'show' : ''}`}
@@ -11,7 +11,7 @@ export const Modal = ({ show, children, onClose }) => (
       <div className="modal-dialog">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title">Modal Title</h5>
+            <h5 className="modal-title">{title}</h5>
             <button type="button" className="btn-close" onClick={onClose} aria-label="Close"></button>
           </div>
           <div className="modal-body">

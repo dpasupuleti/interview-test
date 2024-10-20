@@ -199,7 +199,7 @@ const MemberList = () => {
       )}
 
       {isModalOpen && (
-        <Modal show={isModalOpen} onClose={closeModal}>
+        <Modal show={isModalOpen} onClose={closeModal} title={selectedMember ? 'Edit member' : 'Add member'}>
           <MemberForm
             initialData={selectedMember}
             onSave={handleSave}
