@@ -14,20 +14,51 @@ app.use(bodyParser.json());
 
 /**
  * @query query: string
+ * @query rating: integer
+ * @query activities: string
+ * @query sortBy: string ('name' or 'activities')
+ * @query order: string ('asc' or 'desc')
  */
 app.get('/members', (req, res) => {
-  const query = req.query.query;
-  if (query) {
-    const q = query.toLowerCase();
-    const filteredMembers = members.filter(member =>
+  const { name, rating, activities, sortBy, order } = req.query;
+
+  let filteredMembers = [...members];
+
+  // Filter by name (search query)
+  if (name) {
+    const q = name.toLowerCase();
+    filteredMembers = filteredMembers.filter(member =>
       member?.name?.toLowerCase()?.includes(q)
     );
-    console.log('GET filtered /members');
-    res.send(filteredMembers);
-    return;
   }
-  console.log('GET /members');
-  res.send(members);
+
+  // Filter by rating
+  if (rating) {
+    filteredMembers = filteredMembers.filter(member => member.rating === parseInt(rating));
+  }
+
+  // Filter by activities
+  if (activities) {
+    filteredMembers = filteredMembers.filter(member =>
+      member?.activities?.includes(activities)
+    );
+  }
+
+  // Sort by name or activities
+  if (sortBy) {
+    filteredMembers.sort((a, b) => {
+      const fieldA = sortBy === 'name' ? a.name.toLowerCase() : a.activities.join(', ').toLowerCase();
+      const fieldB = sortBy === 'name' ? b.name.toLowerCase() : b.activities.join(', ').toLowerCase();
+      if (order === 'desc') {
+        return fieldA < fieldB ? 1 : -1;
+      } else {
+        return fieldA > fieldB ? 1 : -1;
+      }
+    });
+  }
+
+  console.log('GET /members with filters');
+  res.send(filteredMembers);
 });
 
 /**
@@ -37,11 +68,11 @@ app.get('/members', (req, res) => {
  * @body rating: enum [1-5]
  */
 app.post("/members", (req, res) => {
-  const body = req.body.body;
+  const body = req.body;
   let newMember = body;
   if (body) {
     if (!body.name) {
-      res.send("Name is required");
+      res.status(400).send("Name is required");
       return;
     }
     newMember = {
@@ -64,18 +95,23 @@ app.post("/members", (req, res) => {
  */
 app.patch('/members/:id', (req, res) => {
   console.log('PATCH /members');
-  const id = req.params.id;
-  const body = req.body.body;
+  const id = String(req.params.id);
+  const body = req.body;
 
-  if (body) {
-    members = members.map(member => {
-      if (member.id === id) {
-        return { ...member, ...body };
-      }
-      return member;
-    });
+  let memberFound = false;
+  members = members.map(member => {
+    if (member.id === id) {
+      memberFound = true;
+      return { ...member, ...body };
+    }
+    return member;
+  });
+
+  if (memberFound) {
+    res.send(body);
+  } else {
+    res.status(404).send('Member not found');
   }
-  res.send(req.body);
 });
 
 /**
@@ -83,10 +119,10 @@ app.patch('/members/:id', (req, res) => {
  */
 app.delete('/members/:id', (req, res) => {
   console.log('DELETE /members');
-  const id = req.params.id;
-  
+  const id = String(req.params.id);
+
   const memberIndex = members.findIndex(member => member.id === id);
-  
+
   if (memberIndex !== -1) {
     members.splice(memberIndex, 1);
     res.send('Member removed successfully');
